@@ -1,5 +1,5 @@
 from django.db import models
 
 class Protein(models.Model):
-    text = models.CharField(max_length=200)
+    protein_name = models.CharField(max_length=200)
 
