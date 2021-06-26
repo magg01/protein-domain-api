@@ -5,5 +5,5 @@ from . import api
 
 urlpatterns = [
     path('', views.index, name="index"),
-    path('api/protein/<int:pk>', api.protein_detail),
+    path('api/protein/<int:pk>', api.ProteinDetails.as_view()),
 ]
