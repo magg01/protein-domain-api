@@ -8,24 +8,24 @@ from rest_framework import status, generics, mixins
 from .models import *
 from .serializers import *
 
-@api_view(['GET','POST'])
-def protein_detail(request, pk):
-    try:
-        protein = Protein.objects.get(pk=pk)
-    except Protein.DoesNotExist:
-        return HttpResponse(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
-        serializer = ProteinSerializer(protein)
-        return Response(serializer.data)
+# @api_view(['GET','POST'])
+# def protein_detail(request, pk):
+#     try:
+#         protein = Protein.objects.get(pk=pk)
+#     except Protein.DoesNotExist:
+#         return HttpResponse(status=status.HTTP_404_NOT_FOUND)
+#     if request.method == 'GET':
+#         serializer = ProteinSerializer(protein)
+#         return Response(serializer.data)
 
-class ProteinDetails(mixins.CreateModelMixin, 
+class OrganismDetails(mixins.CreateModelMixin, 
                     mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
                     mixins.DestroyModelMixin,
                     generics.GenericAPIView):
     
-    queryset = Protein.objects.all()
-    serializer_class = ProteinSerializer
+    queryset = Organism.objects.all()
+    serializer_class = OrganismSerializer
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
