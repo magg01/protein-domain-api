@@ -75,6 +75,12 @@ class Command(BaseCommand):
             proteins = []
             protein_ids = []
 
+            # get a dict (key: taxa_id, value: Organism object) from the database table in bulk
+            # this speeds up the operation of looking up the Organism object for the 
+            # Protein.taxonomy foreign key field below as it reduces database operations to one single SELECT
+            # rather than looking them up in the database individually.
+            organism_dict = Organism.objects.in_bulk(taxa_ids)
+    
             for row in reader:
                 # check the protein_id of this row hasn't already been seen
                 if not row[0] in protein_ids:
@@ -84,7 +90,7 @@ class Command(BaseCommand):
                             protein_id=row[0],
                             length=row[8],
                             sequence=seq_dict.get(row[0]),
-                            taxonomy=Organism.objects.get(taxa_id=row[1])
+                            taxonomy=organism_dict[int(row[1])]
                         )
                     )
                     # append the protein_id of this protein to the unique list 
@@ -100,12 +106,24 @@ class Command(BaseCommand):
             self.stdout.write("Building protein_domains...")
             # empty list for ProteinDomain objects
             protein_domains = []
+
+            # get two dicts
+            # (1) (key: protein_id, value: Protein object) 
+            # (2) (key: domain_id, value: Domain object)
+            # from the database table in bulk
+            # this speeds up the operation of looking up the Protein/Domain objects for the 
+            # ProteinDomain.protein_id/ProteinDomain.domain_id foreign key fields below as 
+            # it reduces database operations to one single SELECT
+            # rather than looking them up in the database individually.
+            protein_dict = Protein.objects.in_bulk(protein_ids,field_name='protein_id')
+            domain_dict = Domain.objects.in_bulk(domain_ids,field_name='domain_id')
+
             for row in reader:           
                 # create a ProteinDomain object and append it to the list
                 protein_domains.append(
                     ProteinDomain(
-                        protein_id=Protein.objects.get(protein_id=row[0]),
-                        domain_id=Domain.objects.get(domain_id=row[5]),
+                        protein_id=protein_dict[row[0]],
+                        domain_id=domain_dict[row[5]],
                         start=row[6],
                         stop=row[7],
                         description=row[4]

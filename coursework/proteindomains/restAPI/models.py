@@ -13,7 +13,7 @@ class Organism(models.Model):
     species = models.CharField(max_length=127)
 
 class Domain(models.Model):
-    domain_id = models.CharField(max_length=13)
+    domain_id = models.CharField(max_length=13, unique=True)
     domain_description = models.CharField(max_length=66)
 
 class Protein(models.Model):
