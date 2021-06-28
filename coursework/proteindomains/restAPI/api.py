@@ -4,7 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status, generics, mixins
+from rest_framework import status, generics, mixins, viewsets
+from rest_framework.serializers import Serializer
 from .models import *
 from .serializers import *
 
@@ -18,23 +19,38 @@ from .serializers import *
 #         serializer = ProteinSerializer(protein)
 #         return Response(serializer.data)
 
-class OrganismDetails(mixins.CreateModelMixin, 
-                    mixins.RetrieveModelMixin,
-                    mixins.UpdateModelMixin,
-                    mixins.DestroyModelMixin,
-                    generics.GenericAPIView):
+class RetrieveProteinView(generics.RetrieveAPIView):
     
-    queryset = Organism.objects.all()
-    serializer_class = OrganismSerializer
+    queryset = Protein.objects.all()
+    lookup_field = 'protein_id'
+    serializer_class = ProteinSerializer
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+class RetrievePfam(generics.RetrieveAPIView):
+    queryset = Domain.objects.all()
+    serializer_class = DomainSerializer
+    lookup_field = 'domain_id'
 
     def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+@api_view(['GET'])
+def RetrievePfamTest(request, domain_id):
+    try:
+        domain = Domain.objects.get(domain_id=domain_id)
+    except Domain.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    if request.method == 'GET':
+        serializer = DomainSerializer(domain)
+        return JsonResponse(serializer.data)
+
+@api_view(['GET','POST'])
+def retrieveCreateProteinView(request, protein_id):
+    if request.method == 'GET':
+        try:
+            protein = Protein.objects.get(protein_id=protein_id)
+        except Protein.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = ProteinSerializer(protein)
+        return JsonResponse(serializer.data)
+    
