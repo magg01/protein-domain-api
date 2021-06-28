@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import constraints
+from django.db.models.constraints import UniqueConstraint
 
 #this was a test - remove all mentions
 #class Protein(models.Model):
@@ -16,7 +18,7 @@ class Domain(models.Model):
 
 class Protein(models.Model):
     taxonomy = models.ForeignKey(Organism, on_delete=models.PROTECT)
-    protein_id = models.CharField(max_length=10)
+    protein_id = models.CharField(max_length=10, unique=True)
     sequence = models.CharField(max_length=35991, null=True)
     length = models.IntegerField()
     domains = models.ManyToManyField(Domain, through='ProteinDomain')
@@ -27,3 +29,7 @@ class ProteinDomain(models.Model):
     start = models.IntegerField()
     stop = models.IntegerField()
     description = models.CharField(max_length=147)
+    class Meta:
+        constraints = [
+        UniqueConstraint(fields=['protein_id', 'domain_id', 'start', 'stop'], name='unique_domain_within_protein')
+        ]
