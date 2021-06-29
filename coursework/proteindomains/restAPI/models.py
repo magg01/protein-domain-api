@@ -12,7 +12,7 @@ class Organism(models.Model):
     genus = models.CharField(max_length=127)
     species = models.CharField(max_length=127)
 
-class Domain(models.Model):
+class Pfam(models.Model):
     domain_id = models.CharField(max_length=13, unique=True)
     domain_description = models.CharField(max_length=66)
 
@@ -21,15 +21,15 @@ class Protein(models.Model):
     protein_id = models.CharField(max_length=10, unique=True)
     sequence = models.CharField(max_length=35991, null=True)
     length = models.IntegerField()
-    domains = models.ManyToManyField(Domain, through='ProteinDomain')
+    pfams = models.ManyToManyField(Pfam, through='ProteinDomain')
 
 class ProteinDomain(models.Model):
     protein_id = models.ForeignKey(Protein, on_delete=models.PROTECT, related_name="domains")
-    domain_id = models.ForeignKey(Domain, on_delete=models.PROTECT)
+    pfam_id = models.ForeignKey(Pfam, on_delete=models.PROTECT)
     start = models.IntegerField()
     stop = models.IntegerField()
     description = models.CharField(max_length=147)
     class Meta:
         constraints = [
-        UniqueConstraint(fields=['protein_id', 'domain_id', 'start', 'stop'], name='unique_domain_within_protein')
+        UniqueConstraint(fields=['protein_id', 'pfam_id', 'start', 'stop'], name='unique_domain_within_protein')
         ]

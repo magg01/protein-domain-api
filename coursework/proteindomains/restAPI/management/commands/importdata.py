@@ -23,17 +23,17 @@ class Command(BaseCommand):
             for row in reader:
                 pfam_dict[row[0]] = row[1]
 
-        # create unique Organism and Domain objects from the data set
+        # create unique Organism and Pfam objects from the data set
         with open('input_files/assignment_data_set.csv', newline='') as assignment_csv:
             reader = csv.reader(assignment_csv, delimiter=',')
             # empty lists for Organism and Domain objects
             organisms = []
-            domains = []
+            pfams = []
             # empty lists to track unique values
             taxa_ids = []
-            domain_ids = []
+            pfam_ids = []
 
-            self.stdout.write("Building organisms and domains...")
+            self.stdout.write("Building organisms and pfams...")
             for row in reader:
                 # check the taxa_id of this row hasn't already been seen
                 if not row[1] in taxa_ids:
@@ -51,21 +51,21 @@ class Command(BaseCommand):
                     # append the taxa_id of this organism to the unique list 
                     taxa_ids.append(row[1])
                 # check the pfam_id of this row hasn't already been seen
-                if not row[5] in domain_ids:
-                    # create a Domain object and append it to the list
-                    domains.append(
-                        Domain(
+                if not row[5] in pfam_ids:
+                    # create a Pfam object and append it to the list
+                    pfams.append(
+                        Pfam(
                             domain_id=row[5],
                             domain_description=pfam_dict[row[5]]
                         )
                     )
-                    # append the domain_id of this organism to the unique list 
-                    domain_ids.append(row[5])
+                    # append the domain_id of this Pfam to the unique list 
+                    pfam_ids.append(row[5])
         
         self.stdout.write("Updating the database")
-        # bulk update the database with the Organisms and Domains objects
+        # bulk update the database with the Organism and Pfam objects
         Organism.objects.bulk_create(organisms)
-        Domain.objects.bulk_create(domains)
+        Pfam.objects.bulk_create(pfams)
 
         # create unique Protein objects from the data set
         with open('input_files/assignment_data_set.csv', newline='') as assignment_csv:
@@ -116,14 +116,14 @@ class Command(BaseCommand):
             # it reduces database operations to one single SELECT
             # rather than looking them up in the database individually.
             protein_dict = Protein.objects.in_bulk(protein_ids,field_name='protein_id')
-            domain_dict = Domain.objects.in_bulk(domain_ids,field_name='domain_id')
+            domain_dict = Pfam.objects.in_bulk(pfam_ids,field_name='domain_id')
 
             for row in reader:           
                 # create a ProteinDomain object and append it to the list
                 protein_domains.append(
                     ProteinDomain(
                         protein_id=protein_dict[row[0]],
-                        domain_id=domain_dict[row[5]],
+                        pfam_id=domain_dict[row[5]],
                         start=row[6],
                         stop=row[7],
                         description=row[4]

@@ -14,18 +14,17 @@ class OrganismSerializer(serializers.ModelSerializer):
         model = Organism
         fields = ['taxa_id','clade','genus','species']
 
-class DomainSerializer(serializers.ModelSerializer):
-
+class PfamSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Domain
+        model = Pfam
         fields = ['domain_id','domain_description']
 
 class ProteinDomainSerializer(serializers.ModelSerializer):
-    domain_id = DomainSerializer()
+    pfam_id = PfamSerializer()
 
     class Meta:
         model = ProteinDomain
-        fields = ['domain_id', 'description', 'start', 'stop' ]
+        fields = ['pfam_id','description','start','stop' ]
 
 class ProteinSerializer(serializers.ModelSerializer):
     domains = ProteinDomainSerializer(many=True, read_only=True)

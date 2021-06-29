@@ -26,8 +26,8 @@ class RetrieveProteinView(generics.RetrieveAPIView):
     serializer_class = ProteinSerializer
 
 class RetrievePfam(generics.RetrieveAPIView):
-    queryset = Domain.objects.all()
-    serializer_class = DomainSerializer
+    queryset = Pfam.objects.all()
+    serializer_class = PfamSerializer
     lookup_field = 'domain_id'
 
     def get(self, request, *args, **kwargs):
@@ -36,12 +36,12 @@ class RetrievePfam(generics.RetrieveAPIView):
 @api_view(['GET'])
 def RetrievePfamTest(request, domain_id):
     try:
-        domain = Domain.objects.get(domain_id=domain_id)
-    except Domain.DoesNotExist:
+        pfam = Pfam.objects.get(domain_id=domain_id)
+    except Pfam.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = DomainSerializer(domain)
+        serializer = PfamSerializer(pfam)
         return JsonResponse(serializer.data)
 
 @api_view(['GET','POST'])
