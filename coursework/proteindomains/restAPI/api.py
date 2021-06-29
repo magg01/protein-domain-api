@@ -56,9 +56,12 @@ def retrieveCreateProteinView(request, protein_id):
     
 
 @api_view(['GET'])
-def RetrieveProteinDomainTest(request, protein_id):
+def retrieveProteinDomainTest(request, protein_id):
+    print("reached here")
     try:
-        proteinDomain = ProteinDomain.objects.filter(protein_id=2)
+        protein = Protein.objects.get(protein_id=protein_id)
+        proteinDomain = ProteinDomain.objects.filter(protein_id=protein.id)
+        print(proteinDomain)
     except ProteinDomain.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 

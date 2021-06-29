@@ -24,7 +24,7 @@ class Protein(models.Model):
     domains = models.ManyToManyField(Domain, through='ProteinDomain')
 
 class ProteinDomain(models.Model):
-    protein_id = models.ForeignKey(Protein, on_delete=models.PROTECT)
+    protein_id = models.ForeignKey(Protein, on_delete=models.PROTECT, related_name="domains")
     domain_id = models.ForeignKey(Domain, on_delete=models.PROTECT)
     start = models.IntegerField()
     stop = models.IntegerField()
