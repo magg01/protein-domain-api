@@ -9,7 +9,7 @@ urlpatterns = [
     # endpoint 1 PUT-only
     path('protein/', api.CreateProtein.as_view()),
     # endpoint 2
-    path('pfam/<str:domain_id>', api.RetrievePfam.as_view()),
+    path('pfam/<str:domain_id>', api.RetrievePfam.as_view(), name='pfam_api'),
     # endpoint 3
     path('proteins/<str:taxa_id>', api.retrieveOrganismProteins),
     # endpoint 4

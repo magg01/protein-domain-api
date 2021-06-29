@@ -7,7 +7,7 @@ from .models import *
 
 class PfamFactory(factory.django.DjangoModelFactory):
     domain_id = 'PF20012'
-    description = 'This is a good description of a pfam'
+    domain_description = 'This is a good description of a pfam'
 
     class Meta:
         model = Pfam
