@@ -1,10 +1,5 @@
 from django.db import models
-from django.db.models import constraints
 from django.db.models.constraints import UniqueConstraint
-
-#this was a test - remove all mentions
-#class Protein(models.Model):
-#    protein_name = models.CharField(max_length=200)
 
 class Organism(models.Model):
     taxa_id = models.IntegerField(primary_key=True)
@@ -17,7 +12,7 @@ class Pfam(models.Model):
     domain_description = models.CharField(max_length=66)
 
 class Protein(models.Model):
-    taxonomy = models.ForeignKey(Organism, on_delete=models.PROTECT)
+    taxonomy = models.ForeignKey(Organism, on_delete=models.PROTECT, related_name="organisms")
     protein_id = models.CharField(max_length=10, unique=True)
     sequence = models.CharField(max_length=35991, null=True)
     length = models.IntegerField()
