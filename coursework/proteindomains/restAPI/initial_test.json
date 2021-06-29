@@ -1,9 +1,0 @@
-[
-    {
-        "model": "restAPI.Protein",
-        "pk": 1,
-        "fields": {
-            "protein_name": "ptefb1"
-        }
-    }
-]
