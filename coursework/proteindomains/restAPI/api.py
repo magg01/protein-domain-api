@@ -54,3 +54,14 @@ def retrieveCreateProteinView(request, protein_id):
         serializer = ProteinSerializer(protein)
         return JsonResponse(serializer.data)
     
+
+@api_view(['GET'])
+def RetrieveProteinDomainTest(request, protein_id):
+    try:
+        proteinDomain = ProteinDomain.objects.filter(protein_id=2)
+    except ProteinDomain.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = ProteinDomainSerializer(proteinDomain, many=True)
+        return JsonResponse(serializer.data, safe=False)

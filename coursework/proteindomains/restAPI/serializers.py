@@ -1,3 +1,4 @@
+from django.db.models import fields
 from rest_framework import serializers
 from .models import *
 
@@ -9,31 +10,28 @@ from .models import *
 class ProteinDomainSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProteinDomain
-        fields = ['protein_id', 'domain_id', 'start', 'stop', 'description']
+        fields = ['domain_id', 'description', 'start', 'stop' ]
+        depth = 2
 
 class OrganismSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organism
         fields = ['taxa_id','clade','genus','species']
 
-class ProteinSerializer(serializers.ModelSerializer):
-    proteinDomain = ProteinDomainSerializer(read_only=True, many=True)
-
-    class Meta:
-        model = Protein
-        fields = ['protein_id','sequence','taxonomy','length', 'domains','proteinDomain']
-        depth = 3
-
-
 class DomainSerializer(serializers.ModelSerializer):
+    domain_id = ProteinDomainSerializer(many=True, read_only=True)
+
     class Meta:
         model = Domain
         fields = ['domain_id','domain_description']
 
-class ProteinDetailsSerializer(serializers.ModelSerializer):
+class ProteinSerializer(serializers.ModelSerializer):
+    domains = ProteinDomainSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Protein
-        fields = ['protein_id', 'sequence']
+        fields = ['protein_id','sequence','taxonomy','length', 'domains']
+        depth = 2
 
 
 

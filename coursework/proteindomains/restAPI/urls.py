@@ -10,4 +10,5 @@ urlpatterns = [
     path('api/pfam/<str:domain_id>', api.RetrievePfam.as_view()),
     path('api/pfam_test/<str:domain_id>', api.RetrievePfamTest),
     path('api/protein_test/<str:protein_id>', api.retrieveCreateProteinView),
+    path('api/proteinDomain_test/<str:protein_id>', api.RetrieveProteinDomainTest),
 ]
