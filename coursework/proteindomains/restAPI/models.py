@@ -14,8 +14,8 @@ class Pfam(models.Model):
 class Protein(models.Model):
     taxonomy = models.ForeignKey(Organism, on_delete=models.PROTECT, related_name="organisms")
     protein_id = models.CharField(max_length=10, unique=True)
-    sequence = models.CharField(max_length=35991, null=True)
-    length = models.IntegerField()
+    sequence = models.CharField(max_length=35991, null=True, blank=True)
+    length = models.IntegerField(null=True)
     pfams = models.ManyToManyField(Pfam, through='ProteinDomain')
 
 class ProteinDomain(models.Model):
