@@ -39,8 +39,20 @@ class PfamTest(APITestCase):
         response = self.client.get(self.bad_url)
         self.assertEqual(response.status_code, 404)
 
-    def test_PfamBadRequestMethod(self):
+    def test_PfamPostRequestMethodNotAllowed(self):
         response = self.client.post(self.good_url)
+        self.assertEqual(response.status_code, 405)
+
+    def test_PfamPutRequestMethodNotAllowed(self):
+        response = self.client.put(self.good_url)
+        self.assertEqual(response.status_code, 405)
+        
+    def test_PfamPatchRequestMethodNotAllowed(self):
+        response = self.client.patch(self.good_url)
+        self.assertEqual(response.status_code, 405)
+    
+    def test_PfamDeleteRequestMethodNotAllowed(self):
+        response = self.client.delete(self.good_url)
         self.assertEqual(response.status_code, 405)
 
 
