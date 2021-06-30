@@ -1,38 +1,37 @@
-from django.test import TestCase
-from django.conf import settings
-from django.core.files import File
+from random import randint
+
 import factory
 import factory.fuzzy
 
 from .models import *
 
 class PfamFactory(factory.django.DjangoModelFactory):
-    domain_id = factory.Sequence(lambda n: 'pfam%d' % n+str(1))
-    domain_description = factory.Faker('sentence', nb_words=4, length=)
+    domain_id = factory.fuzzy.FuzzyText(length=randint(1,13))
+    domain_description = factory.Faker('sentence', nb_words=4)
     class Meta:
         model = Pfam
 
 class OrganismFactory(factory.django.DjangoModelFactory):
-    taxa_id = factory.fuzzy.FuzzyInteger()
-    clade = 'H'
-    genus = "Danaus"
-    species = "plexippus"
+    taxa_id = factory.fuzzy.FuzzyInteger(0)
+    clade = factory.fuzzy.FuzzyText(length=1)
+    genus = factory.Faker('word')
+    species = factory.Faker('word')
 
     class Meta:
         model = Organism
 
 class ProteinFactory(factory.django.DjangoModelFactory):
     taxonomy = factory.SubFactory(PfamFactory)
-    protein_id = "ProteinXX"
-    sequence = "YEJENALDJ"
-    length = 9
+    protein_id = factory.fuzzy.FuzzyText(length=randint(1,10))
+    sequence = factory.fuzzy.FuzzyText(length=randint(1,35991))
+    length = factory.fuzzy.FuzzyInteger(35991)
 
 class ProteinDomainFactory(factory.django.DjangoModelFactory):
     protein_id = factory.RelatedFactory(ProteinFactory)
     pfam_id = factory.RelatedFactory(OrganismFactory)
-    start = randint(1, 50)
-    stop = start + randint(1, 1000)
-    description = 'a rather boring alpha helix'
+    start = factory.fuzzy.FuzzyInteger(0,20000)
+    stop = factory.fuzzy.FuzzyInteger(20000, 35991)
+    description = factory.Faker('sentence', nb_words=4)
 
     class Meta:
         model = ProteinDomain
