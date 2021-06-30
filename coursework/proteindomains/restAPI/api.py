@@ -1,50 +1,32 @@
-from django.db.models import query
-from django.db.models.query import QuerySet
 from django.http import JsonResponse
-from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, generics
-from rest_framework.serializers import Serializer
 
 from .models import *
 from .serializers import *
 
 ############## endpoint 1 ###############
 ######## GET #########
-# class-based view
+# class-based view for returning JSON at enpoint 1 - protein details
 class RetrieveProtein(generics.RetrieveAPIView):
     queryset = Protein.objects.all()
     lookup_field = 'protein_id'
     serializer_class = ProteinDetailSerializer
 
-    #return bare Json - not the view
+    #return bare Json - not the HTML view
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return JsonResponse(serializer.data)
 
-# function-based view
-# @api_view(['GET'])
-# def retrieveCreateProteinView(request, protein_id):
-#     if request.method == 'GET':
-#         try:
-#             protein = Protein.objects.get(protein_id=protein_id)
-#         except Protein.DoesNotExist:
-#             return Response(status=status.HTTP_404_NOT_FOUND)
-#         serializer = ProteinDetailSerializer(protein)
-#         return JsonResponse(serializer.data)
-#     elif request.method == 'POST':
-#         JsonResponse({'test': 'ok'})
-
 ######## POST #########
-# class-based view
+# class-based view for accepting POST request to create a new Protein record
 class CreateProtein(generics.CreateAPIView):
     serializer_class = ProteinSerializer
 
 ############## endpoint 2 ###############
-
-# class-based view
+# class-based view for returning JSON at enpoint 2 - pfam details
 class RetrievePfam(generics.RetrieveAPIView):
     queryset = Pfam.objects.all()
     serializer_class = PfamSerializer
@@ -55,21 +37,9 @@ class RetrievePfam(generics.RetrieveAPIView):
         Serializer = self.get_serializer(instance)
         return JsonResponse(Serializer.data)
 
-# function-based view
-# @api_view(['GET'])
-# def retrievePfam(request, domain_id):
-#     if request.method == 'GET':
-#         try:
-#             pfam = Pfam.objects.get(domain_id=domain_id)
-#         except Pfam.DoesNotExist:
-#             return Response(status=status.HTTP_404_NOT_FOUND)
-
-#         serializer = PfamSerializer(pfam)
-#         return JsonResponse(serializer.data)
-
 ############## endpoint 3 ###############
-
-# function-based view
+# function-based view allows only GET method
+# for returning JSON at endpoint 3 - list of proteins found in a particular organism
 @api_view(['GET'])
 def retrieveOrganismProteins(request, taxa_id):
     if request.method == 'GET':
@@ -84,8 +54,9 @@ def retrieveOrganismProteins(request, taxa_id):
         return JsonResponse(serializer.data, safe=False)
 
 ############## endpoint 4 ###############
-
-# function-based view
+# function-based view allows only GET method
+# for returning JSON at endpoint 4 - list of domains for all proteins 
+# found in a particular organism 
 @api_view(['GET'])
 def retrieveOrganismProteinDomains(request, taxa_id):
     if request.method == 'GET':
@@ -101,8 +72,8 @@ def retrieveOrganismProteinDomains(request, taxa_id):
         return JsonResponse(serializer.data, safe=False)
 
 ############## endpoint 5 ###############
-
-# function-based view
+# function-based view allows only GET method
+# for returning JSON at endpoint 5 - coverage value of a particular protein
 @api_view(['GET'])
 def retrieveCoverage(request, protein_id):
     if request.method == 'GET':
@@ -119,31 +90,3 @@ def retrieveCoverage(request, protein_id):
 
         coverage = totalDomainLength / protein.length
         return JsonResponse({"coverage": coverage})
-
-
-#class RetrievePfam(generics.RetrieveAPIView):
-#     queryset = Pfam.objects.all()
-#     serializer_class = PfamSerializer
-#     lookup_field = 'domain_id'
-
-#     def get(self, request, *args, **kwargs):
-#         return super().get(request, *args, **kwargs)
-
-# class RetrieveProteinView(generics.mixins.CreateAPIView, generics.RetrieveAPIView):
-#     queryset = Protein.objects.all()
-#     lookup_field = 'protein_id'
-#     serializer_class = ProteinSerializer
-    
-
-# @api_view(['GET'])
-# def retrieveProteinDomainTest(request, protein_id):
-#     try:
-#         protein = Protein.objects.get(protein_id=protein_id)
-#         proteinDomain = ProteinDomain.objects.filter(protein_id=protein.id)
-#         print(proteinDomain)
-#     except ProteinDomain.DoesNotExist:
-#         return Response(status=status.HTTP_404_NOT_FOUND)
-
-#     if request.method == 'GET':
-#         serializer = ProteinDomainSerializer(proteinDomain, many=True)
-#         return JsonResponse(serializer.data, safe=False)

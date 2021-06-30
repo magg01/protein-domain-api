@@ -1,8 +1,7 @@
-from typing import Sequence
-from django.core.management.base import BaseCommand, CommandError
 import csv
 
-#from restAPI import Organism
+from django.core.management.base import BaseCommand
+
 from restAPI.models import *
 
 class Command(BaseCommand):
