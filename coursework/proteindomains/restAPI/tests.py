@@ -277,3 +277,7 @@ class ProteinDomainSerializerTest(APITestCase):
     def test_proteinDomainSerializerDescriptionHasCorrectData(self):
         self.assertEqual(self.data['description'], self.proteinDomain1.description)
 
+from io import StringIO
+from django.core.management import call_command
+from django.test import TestCase
+
