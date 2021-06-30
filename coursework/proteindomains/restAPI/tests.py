@@ -1,17 +1,16 @@
 import json
 from io import StringIO
 
-from django.test.testcases import TransactionTestCase
 from django.urls import reverse
 from django.db.utils import IntegrityError
 from django.core.management import call_command
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APITransactionTestCase
 
 from .model_factories import *
 from .serializers import *
 
 # test cases for import script and resulting database
-class ImportDataScriptTest(TransactionTestCase):
+class ImportDataScriptTest(APITransactionTestCase):
     
     outMessage = ""
 
@@ -174,7 +173,7 @@ class ProteinAPITest(APITestCase):
 
 
 # test cases for the Pfam database constraints
-class PfamTransactionTest(TransactionTestCase):
+class PfamTransactionTest(APITransactionTestCase):
 
     pfam = None
     
@@ -197,7 +196,7 @@ class PfamTransactionTest(TransactionTestCase):
 
 
 # test cases for the Protein database constraints
-class ProteinTransactionTest(TransactionTestCase):
+class ProteinTransactionTest(APITransactionTestCase):
 
     protein = None
     
