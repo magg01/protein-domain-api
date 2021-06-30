@@ -5,7 +5,7 @@ from . import api
 
 urlpatterns = [  
     # endpoint 1 GET-only
-    path('protein/<str:protein_id>', api.RetrieveProtein.as_view()),
+    path('protein/<str:protein_id>', api.RetrieveProtein.as_view(), name='GET_protein_api'),
     # endpoint 1 PUT-only
     path('protein/', api.CreateProtein.as_view()),
     # endpoint 2
