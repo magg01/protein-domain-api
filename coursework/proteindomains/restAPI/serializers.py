@@ -17,7 +17,7 @@ class ProteinDomainSerializer(serializers.ModelSerializer):
     pfam_id = PfamSerializer()
     class Meta:
         model = ProteinDomain
-        fields = ['pfam_id','description','start','stop' ]
+        fields = ['pfam_id','description','start','stop']
 
 class ProteinDetailSerializer(serializers.ModelSerializer):
     domains = ProteinDomainSerializer(many=True, read_only=True)
