@@ -7,11 +7,12 @@ from django.db.utils import IntegrityError
 
 from rest_framework.test import APIRequestFactory
 from rest_framework.test import APITestCase
+from rest_framework.test import APIClient
 
 from .model_factories import *
 from .serializers import *
 
-class PfamTest(APITestCase):
+class PfamAPITest(APITestCase):
 
     pfam1 = None
     pfam2 = None
@@ -61,7 +62,7 @@ class PfamTest(APITestCase):
         response = self.client.delete(self.good_url)
         self.assertEqual(response.status_code, 405)
 
-class ProteinTest(APITestCase):
+class ProteinAPITest(APITestCase):
 
     protein1 = None
     good_url = ''
@@ -121,6 +122,30 @@ class ProteinTest(APITestCase):
         response = self.client.delete(self.good_url)
         self.assertEqual(response.status_code, 405)
 
+    def test_ProteinPostGoodProteinSuccessful(self):
+        url = reverse('POST_protein_api')
+        protein = ProteinFactory.build()
+        organism = OrganismFactory.create()
+        response = self.client.post(url, {
+            "taxonomy": organism.taxa_id,
+            "protein_id": protein.protein_id,
+            "sequence": protein.sequence,
+            "length": protein.length
+        }, format='json')
+        self.assertEqual(response.status_code, 201)
+    
+    def test_ProteinPostDuplicateProteinIdIsUnsuccessful(self):
+        url = reverse('POST_protein_api')
+        protein1 = ProteinFactory.create()
+        protein2 = ProteinFactory.build()
+        response = self.client.post(url, {
+            "taxonomy": protein2.taxonomy.taxa_id,
+            "protein_id": protein1.protein_id,
+            "sequence": protein2.sequence,
+            "length": protein2.length
+        }, format='json')
+        self.assertEqual(response.status_code, 400)
+
 
 class PfamTransactionTest(TransactionTestCase):
 
@@ -140,6 +165,28 @@ class PfamTransactionTest(TransactionTestCase):
     def test_PfamNotUniqueDomainDescriptionIsAllowed(self):
         try:
             PfamFactory.create(domain_description=self.pfam.domain_description)
+        except IntegrityError:
+            self.fail("an integrity error was generated on this operation, which wasn't expected")
+
+
+class ProteinTransactionTest(TransactionTestCase):
+
+    protein = None
+    
+    def setUp(self):
+        self.protein = ProteinFactory.create()
+    
+    def tearDown(self):
+        Protein.objects.all().delete()
+        ProteinFactory.reset_sequence(0)
+
+    def test_ProteinUniqueConstraintOnProteinId(self):
+        with self.assertRaises(IntegrityError):
+            ProteinFactory.create(protein_id=self.protein.protein_id)
+
+    def test_ProteinNotUniqueOrganismIsAllowed(self):
+        try:
+            ProteinFactory.create(taxonomy=self.protein.taxonomy)
         except IntegrityError:
             self.fail("an integrity error was generated on this operation, which wasn't expected")
 
