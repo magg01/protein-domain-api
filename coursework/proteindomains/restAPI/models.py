@@ -1,15 +1,15 @@
 from django.db import models
 from django.db.models.constraints import UniqueConstraint
 
+class Pfam(models.Model):
+    domain_id = models.CharField(max_length=13, unique=True)
+    domain_description = models.CharField(max_length=66)
+
 class Organism(models.Model):
     taxa_id = models.IntegerField(primary_key=True)
     clade = models.CharField(max_length=1)
     genus = models.CharField(max_length=127)
     species = models.CharField(max_length=127)
-
-class Pfam(models.Model):
-    domain_id = models.CharField(max_length=13, unique=True)
-    domain_description = models.CharField(max_length=66)
 
 class Protein(models.Model):
     taxonomy = models.ForeignKey(Organism, on_delete=models.PROTECT, related_name="organisms")
