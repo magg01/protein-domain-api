@@ -1,17 +1,42 @@
 import json
-from django.test import TestCase
+from io import StringIO
+
 from django.test.testcases import TransactionTestCase
 from django.urls import reverse
-from django.urls import reverse_lazy
 from django.db.utils import IntegrityError
-
-from rest_framework.test import APIRequestFactory
+from django.core.management import call_command
 from rest_framework.test import APITestCase
-from rest_framework.test import APIClient
 
 from .model_factories import *
 from .serializers import *
 
+# test cases for import script and resulting database
+class ImportDataScriptTest(TransactionTestCase):
+    
+    outMessage = ""
+
+    def setUp(self):
+        self.outMessage = StringIO()
+        call_command('importdata', stdout=self.outMessage)
+
+    # check import script completes successfully
+    def test_commandOutput(self):
+        self.assertIn("Data import finished with no errors.", self.outMessage.getvalue())
+    
+    # check correct number of records created (from given dataset only)
+    def test_correctNumberOfProteinsCreated(self):
+        self.assertEqual(len(Protein.objects.all()), 9988)
+    
+    def test_correctNumberOfOrganismsCreated(self):
+        self.assertEqual(len(Organism.objects.all()), 1995)
+
+    def test_correctNumberOfPfamsCreated(self):
+        self.assertEqual(len(Pfam.objects.all()), 2453)
+    
+    def test_correctNumberOfProteinDomainsCreated(self):
+        self.assertEqual(len(ProteinDomain.objects.all()), 10000)         
+
+# test cases for the Pfam API endpoint
 class PfamAPITest(APITestCase):
 
     pfam1 = None
@@ -32,7 +57,7 @@ class PfamAPITest(APITestCase):
     def tearDown(self):
         Pfam.objects.all().delete()
         PfamFactory.reset_sequence(0)
-        
+    
     def test_PfamDetailReturnSuccess(self):
         self.assertEqual(self.good_url_get_response.status_code, 200)
 
@@ -62,6 +87,7 @@ class PfamAPITest(APITestCase):
         response = self.client.delete(self.good_url)
         self.assertEqual(response.status_code, 405)
 
+# test cases for the Protein API endpoint
 class ProteinAPITest(APITestCase):
 
     protein1 = None
@@ -147,6 +173,7 @@ class ProteinAPITest(APITestCase):
         self.assertEqual(response.status_code, 400)
 
 
+# test cases for the Pfam database constraints
 class PfamTransactionTest(TransactionTestCase):
 
     pfam = None
@@ -169,6 +196,7 @@ class PfamTransactionTest(TransactionTestCase):
             self.fail("an integrity error was generated on this operation, which wasn't expected")
 
 
+# test cases for the Protein database constraints
 class ProteinTransactionTest(TransactionTestCase):
 
     protein = None
@@ -190,6 +218,7 @@ class ProteinTransactionTest(TransactionTestCase):
         except IntegrityError:
             self.fail("an integrity error was generated on this operation, which wasn't expected")
 
+# test cases for the Pfam serializer
 class PfamSerializerTest(APITestCase):
     pfam1 = None
     pfamSerializer = None
@@ -204,7 +233,7 @@ class PfamSerializerTest(APITestCase):
         Pfam.objects.all().delete()
         PfamFactory.reset_sequence(0)
 
-    def test_pfamSerializer(self):
+    def test_pfamSerializerKeySetCorrect(self):
         self.assertEqual(set(self.data.keys()), set(['domain_id', 'domain_description']))
 
     def test_pfamSerializerDomainIdHasCorrectData(self):
@@ -212,7 +241,8 @@ class PfamSerializerTest(APITestCase):
 
     def test_pfamSerializerDomainIdHasCorrectData(self):
         self.assertEqual(self.data['domain_description'], self.pfam1.domain_description)
-        
+
+# test cases for the Protein serializer        
 class ProteinSerializerTest(APITestCase):
     protein1 = None
     proteinSerializer = None
@@ -229,7 +259,7 @@ class ProteinSerializerTest(APITestCase):
         Organism.objects.all().delete()
         OrganismFactory.reset_sequence(0)
 
-    def test_proteinSerializer(self):
+    def test_proteinSerializerKeySetCorrect(self):
         self.assertEqual(set(self.data.keys()), set(['id','taxonomy', 'protein_id', 'sequence', 'length', 'pfams']))
 
     def test_proteinSerializerTaxonomyHasCorrectData(self):
@@ -244,6 +274,7 @@ class ProteinSerializerTest(APITestCase):
     def test_proteinSerializerLengthHasCorrectData(self):
         self.assertEqual(self.data['length'], self.protein1.length)
 
+# test cases for the ProteinDomain serializer
 class ProteinDomainSerializerTest(APITestCase):
     proteinDomain1 = None
     proteinDomainSerializer = None
@@ -262,7 +293,7 @@ class ProteinDomainSerializerTest(APITestCase):
         Pfam.objects.all().delete()
         PfamFactory.reset_sequence(0)
 
-    def test_proteinDomainSerializer(self):
+    def test_proteinDomainSerializerKeySetCorrect(self):
         self.assertEqual(set(self.data.keys()), set(['pfam_id','start', 'stop', 'description']))
 
     def test_proteinDomainSerializerPfamIdHasCorrectData(self):
@@ -276,5 +307,3 @@ class ProteinDomainSerializerTest(APITestCase):
     
     def test_proteinDomainSerializerDescriptionHasCorrectData(self):
         self.assertEqual(self.data['description'], self.proteinDomain1.description)
-
-
