@@ -30,9 +30,9 @@ class PfamTest(APITestCase):
         response = self.client.get(self.good_url)
         self.assertEqual(response.status_code, 200)
 
-    def test_PfamDetailDomainIdCorrect(self):
+    def test_PfamDetailDomainIdRecievedCorrect(self):
         response = self.client.get(self.good_url)
-        response_json = json.loads(response.getvalue())
+        response_json = json.loads(response.content)
         self.assertEqual(response_json['domain_id'], "PF00014")
 
     def test_PfamDetailReturnFailOnBadDomainId(self):
@@ -55,4 +55,28 @@ class PfamTest(APITestCase):
         response = self.client.delete(self.good_url)
         self.assertEqual(response.status_code, 405)
 
+class PfamSerializerTest(APITestCase):
+    pfam1 = None
+    pfamSerializer = None
+
+    def setUp(self):
+        self.pfam1 = PfamFactory.create()
+        self.pfamSerializer = PfamSerializer(instance=self.pfam1)
+
+    def tearDown(self):
+        Pfam.objects.all().delete()
+        PfamFactory.reset_sequence(0)
+
+    def test_pfamSerializer(self):
+        data = self.pfamSerializer.data
+        self.assertEqual(set(data.keys()), set(['domain_id', 'domain_description']))
+
+    def test_pfamSerializerDomainIdHasCorrectData(self):
+        data = self.pfamSerializer.data
+        self.assertEqual(data['domain_id'], self.pfam.domain_id)
+
+    def test_pfamSerializerDomainIdHasCorrectData(self):
+        data = self.pfamSerializer.data
+        self.assertEqual(data['domain_description'], self.pfam1.domain_description)
+        
 

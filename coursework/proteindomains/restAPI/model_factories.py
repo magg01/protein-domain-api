@@ -1,19 +1,19 @@
-import factory
 from django.test import TestCase
 from django.conf import settings
 from django.core.files import File
+import factory
+import factory.fuzzy
 
 from .models import *
 
 class PfamFactory(factory.django.DjangoModelFactory):
-    domain_id = 'PF20012'
-    domain_description = 'This is a good description of a pfam'
-
+    domain_id = factory.Sequence(lambda n: 'pfam%d' % n+str(1))
+    domain_description = factory.Faker('sentence', nb_words=4, length=)
     class Meta:
         model = Pfam
 
 class OrganismFactory(factory.django.DjangoModelFactory):
-    taxa_id = 123451
+    taxa_id = factory.fuzzy.FuzzyInteger()
     clade = 'H'
     genus = "Danaus"
     species = "plexippus"
@@ -30,8 +30,8 @@ class ProteinFactory(factory.django.DjangoModelFactory):
 class ProteinDomainFactory(factory.django.DjangoModelFactory):
     protein_id = factory.RelatedFactory(ProteinFactory)
     pfam_id = factory.RelatedFactory(OrganismFactory)
-    start = 24
-    stop = 220
+    start = randint(1, 50)
+    stop = start + randint(1, 1000)
     description = 'a rather boring alpha helix'
 
     class Meta:
