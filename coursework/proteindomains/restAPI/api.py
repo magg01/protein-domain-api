@@ -1,12 +1,12 @@
 from django.db.models import query
 from django.db.models.query import QuerySet
-from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status, generics, mixins, viewsets
+from rest_framework import status, generics
 from rest_framework.serializers import Serializer
+
 from .models import *
 from .serializers import *
 
