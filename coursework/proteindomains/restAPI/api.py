@@ -1,24 +1,17 @@
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import mixins, status, generics
 
 from .models import *
 from .serializers import *
 
-############## endpoint 1 ###############
 ######## GET #########
 # class-based view for returning JSON at enpoint 1 - protein details
 class RetrieveProtein(generics.RetrieveAPIView):
     queryset = Protein.objects.all()
     lookup_field = 'protein_id'
     serializer_class = ProteinDetailSerializer
-
-    #return bare Json - not the HTML view
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return JsonResponse(serializer.data)
 
 ######## POST #########
 # class-based view for accepting POST request to create a new Protein record
@@ -32,12 +25,7 @@ class RetrievePfam(generics.RetrieveAPIView):
     serializer_class = PfamSerializer
     lookup_field = 'domain_id'
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        Serializer = self.get_serializer(instance)
-        return JsonResponse(Serializer.data)
 
-############## endpoint 3 ###############
 # function-based view allows only GET method
 # for returning JSON at endpoint 3 - list of proteins found in a particular organism
 @api_view(['GET'])
@@ -51,7 +39,7 @@ def retrieveOrganismProteins(request, taxa_id):
         proteins = Protein.objects.filter(taxonomy=organism)
 
         serializer = OrganismProteinSerializer(proteins, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return Response(serializer.data)
 
 ############## endpoint 4 ###############
 # function-based view allows only GET method
@@ -69,7 +57,7 @@ def retrieveOrganismProteinDomains(request, taxa_id):
         domains = ProteinDomain.objects.filter(protein_id__in=proteins)
 
         serializer = OrganismProteinDomainSerializer(domains, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return Response(serializer.data)
 
 ############## endpoint 5 ###############
 # function-based view allows only GET method
@@ -89,4 +77,4 @@ def retrieveCoverage(request, protein_id):
             totalDomainLength += domain.stop - domain.start
 
         coverage = totalDomainLength / protein.length
-        return JsonResponse({"coverage": coverage})
+        return Response({"coverage": coverage})
