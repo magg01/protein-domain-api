@@ -1,5 +1,3 @@
-from django.db.models import fields
-from django.db.models.fields.related import RelatedField
 from rest_framework import serializers
 from .models import *
 
