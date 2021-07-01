@@ -1,10 +1,15 @@
 import csv
 
 from django.core.management.base import BaseCommand
+from django.db.utils import IntegrityError, OperationalError
+from factory import django
 
 from restAPI.models import *
 
 class Command(BaseCommand):
+
+    integrityErrors = False
+    operationalErrorMessage = "One or more tables were not found, remember to migrate before import with: \n `python manage.py migrate`."
     
     def handle(self, *args, **options):
 
@@ -61,10 +66,28 @@ class Command(BaseCommand):
                     # append the domain_id of this Pfam to the unique list 
                     pfam_ids.append(row[5])
         
-        self.stdout.write("Updating the database")
         # bulk update the database with the Organism and Pfam objects
-        Organism.objects.bulk_create(organisms)
-        Pfam.objects.bulk_create(pfams)
+        try:
+            Organism.objects.bulk_create(organisms)
+            self.stdout.write("Updated the database with new Organisms")
+        except IntegrityError:
+            self.integrityErrors = True
+            print("One or more Organisms already exist in the database, none were imported")
+        except OperationalError as oe:
+            print(oe)
+            print(self.operationalErrorMessage)
+            return
+
+        try:
+            Pfam.objects.bulk_create(pfams)
+            self.stdout.write("Updated the database with new Pfams")
+        except IntegrityError:
+            self.integrityErrors = True
+            print("One or more Pfams already exist in the database, none were imported")
+        except OperationalError as oe:
+            print(oe)
+            print(self.operationalErrorMessage)
+            return
 
         # create unique Protein objects from the data set
         with open('input_files/assignment_data_set.csv', newline='') as assignment_csv:
@@ -78,7 +101,12 @@ class Command(BaseCommand):
             # this speeds up the operation of looking up the Organism object for the 
             # Protein.taxonomy foreign key field below as it reduces database operations to one single SELECT
             # rather than looking them up in the database individually.
-            organism_dict = Organism.objects.in_bulk(taxa_ids)
+            try:
+                organism_dict = Organism.objects.in_bulk(taxa_ids)
+            except OperationalError as oe:
+                print(oe)
+                print(self.operationalErrorMessage)
+                return
     
             for row in reader:
                 # check the protein_id of this row hasn't already been seen
@@ -95,9 +123,17 @@ class Command(BaseCommand):
                     # append the protein_id of this protein to the unique list 
                     protein_ids.append(row[0])
 
-        self.stdout.write("Updating the database")
         # bulk update the database with the Protein objects
-        Protein.objects.bulk_create(proteins)        
+        try:
+            Protein.objects.bulk_create(proteins)
+            self.stdout.write("Updated the database with new Proteins")
+        except IntegrityError:
+            self.integrityErrors = True
+            print("One or more Proteins already exist in the database, none were imported")
+        except OperationalError as oe:
+            print(oe)
+            print(self.operationalErrorMessage)
+            return
 
         # create ProteinDomain objects from the data set and insert the records into the database
         with open('input_files/assignment_data_set.csv') as assignment_csv:
@@ -114,8 +150,18 @@ class Command(BaseCommand):
             # ProteinDomain.protein_id/ProteinDomain.domain_id foreign key fields below as 
             # it reduces database operations to one single SELECT
             # rather than looking them up in the database individually.
-            protein_dict = Protein.objects.in_bulk(protein_ids,field_name='protein_id')
-            domain_dict = Pfam.objects.in_bulk(pfam_ids,field_name='domain_id')
+            try:
+                protein_dict = Protein.objects.in_bulk(protein_ids,field_name='protein_id')
+            except OperationalError as oe:
+                print(oe)
+                print(self.operationalErrorMessage)
+                return
+            try:
+                domain_dict = Pfam.objects.in_bulk(pfam_ids,field_name='domain_id')
+            except OperationalError as oe:
+                print(oe)
+                print(self.operationalErrorMessage)
+                return
 
             for row in reader:           
                 # create a ProteinDomain object and append it to the list
@@ -129,9 +175,24 @@ class Command(BaseCommand):
                     )
                 )
         
-        self.stdout.write("Updating the database")
         # bulk update the database with the ProteinDomain objects
-        ProteinDomain.objects.bulk_create(protein_domains)
-    
+        try:
+            ProteinDomain.objects.bulk_create(protein_domains)
+            self.stdout.write("Updated the database with new ProteinDomains")
+        except IntegrityError:
+            self.integrityErrors = True
+            print("One or more ProteinDomains already exist in the database, none were imported")
+        except OperationalError as oe:
+            self.operationalErrors = True
+            print(oe)
+            print(self.operationalErrorMessage)
+            return
+
         # print a status message to the console
-        self.stdout.write("Data import finished with no errors.")
+        if not self.integrityErrors:
+            self.stdout.write("Data import finished with no errors.")
+        else:
+            self.stdout.write("Import script completed with errors.\nCheck that there are no pre-existing or duplicate records in your data files.")
+
+
+    
