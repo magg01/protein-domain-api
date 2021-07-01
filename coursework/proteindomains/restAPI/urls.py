@@ -11,9 +11,9 @@ urlpatterns = [
     # endpoint 2 - pfam details
     path('pfam/<str:domain_id>', api.RetrievePfam.as_view(), name='pfam_api'),
     # endpoint 3 - proteins in organism
-    path('proteins/<str:taxa_id>', api.retrieveOrganismProteins),
+    path('proteins/<str:taxa_id>', api.retrieveOrganismProteins, name='organism_protein_api'),
     # endpoint 4 - domains of proteins in organism
-    path('pfams/<str:taxa_id>', api.retrieveOrganismProteinDomains),
+    path('pfams/<str:taxa_id>', api.retrieveOrganismProteinDomains, name='organism_protein_domain_api'),
     # endpoint 5 - coverage
-    path('coverage/<str:protein_id>', api.retrieveCoverage),
+    path('coverage/<str:protein_id>', api.retrieveCoverage, name='protein_coverage_api'),
 ]
